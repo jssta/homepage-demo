@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aerion Dynamics (Sample) - Corporate ePortal</title>
+    <style>
+        :root {
+            --m365-navy: #0F2537;
+            --m365-dark-navy: #081521;
+            --m365-blue: #0078D4;
+            --m365-light-blue: #EFF6FC;
+            --m365-border: #EDEBE9;
+            --m365-bg: #F3F2F1;
+            --m365-card-bg: #FFFFFF;
+            --m365-text: #323130;
+            --m365-text-secondary: #605E5C;
+            --tag-bg: #E1DFDD;
+            --tag-text: #323130;
+            --mech-tag-bg: #E6F2FB;
+            --mech-tag-color: #005A9E;
+            --mech-spfx-bg: #F3E8FF;
+            --mech-spfx-color: #6B21A8;
+            --mech-list-bg: #E0F2FE;
+            --mech-list-color: #0369A1;
+            --mech-pbi-bg: #FEF3C7;
+            --mech-pbi-color: #92400E;
+            --mech-teams-bg: #E0E7FF;
+            --mech-teams-color: #3730A3;
+            --mech-purview-bg: #FEE2E2;
+            --mech-purview-color: #991B1B;
+            --pill-important: #D13438;
+            --pill-notice: #D97706;
+            --pill-info: #0078D4;
+            --pill-update: #107C41;
+            --font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-family); background-color: var(--m365-bg); color: var(--m365-text); font-size: 13px; line-height: 1.4; padding-bottom: 36px; }
+
+        /* --- SUITE BAR --- */
+        .suite-bar {
+            height: 48px;
+            background-color: var(--m365-navy);
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .suite-left, .suite-right, .suite-center { display: flex; align-items: center; gap: 12px; }
+        
+        .waffle-icon {
+            width: 32px; height: 32px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 6px; cursor: pointer; border-radius: 2px;
+        }
+        .waffle-icon:hover { background-color: rgba(255,255,255,0.1); }
+        .waffle-icon span { background-color: #FFFFFF; border-radius: 1px; }
+
+        .brand-title { font-size: 15px; font-weight: 600; color: #FFFFFF; display: flex; align-items: center; gap: 8px; }
+
+        /* Role Switcher Box */
+        .switcher-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.08);
+            padding: 4px 10px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .switcher-label { font-size: 11px; color: #C8C6C4; font-weight: 600; }
+        .demo-tag { background: #FFD700; color: #000; font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 3px; text-transform: uppercase; }
+        .switcher-select {
+            background: transparent; color: #FFFFFF; border: none; font-size: 12px; font-weight: 600; outline: none; cursor: pointer;
+        }
+        .switcher-select option { background-color: var(--m365-dark-navy); color: #FFF; }
+
+        /* Search Box in Suite Bar */
+        .suite-search {
+            display: flex; align-items: center; background: rgba(255,255,255,0.12); border-radius: 4px; padding: 4px 10px; gap: 8px; width: 220px; border: 1px solid rgba(255,255,255,0.2);
+        }
+        .suite-search input { background: transparent; border: none; color: #FFF; font-size: 12px; outline: none; width: 100%; }
+        .suite-search input::placeholder { color: #C8C6C4; }
+
+        /* Language Toggle & User */
+        .lang-switch { font-size: 11px; font-weight: 600; cursor: pointer; color: #C8C6C4; display: flex; gap: 4px; }
+        .lang-switch span.active { color: #FFF; border-bottom: 2px solid #FFF; }
+        
+        .user-profile { display: flex; align-items: center; gap: 8px; }
+        .avatar { width: 30px; height: 30px; border-radius: 50%; background: #005A9E; color: #FFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; border: 1px solid #FFF; }
+        .user-details { display: flex; flex-direction: column; text-align: left; }
+        .user-name { font-size: 12px; font-weight: 600; line-height: 1.1; }
+        .user-role-badge { font-size: 9px; padding: 1px 5px; border-radius: 2px; font-weight: 700; width: fit-content; margin-top: 2px; text-transform: uppercase; }
+        .badge-internal { background: #0078D4; color: #FFF; }
+        .badge-dealteam { background: #107C41; color: #FFF; }
+        .badge-guest { background: #008272; color: #FFF; }
+        .badge-admin { background: #5C2D91; color: #FFF; }
+
+        /* --- NAVIGATION BAR --- */
+        .nav-bar {
+            background: #FFFFFF; border-bottom: 1px solid var(--m365-border); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .nav-items { display: flex; list-style: none; gap: 2px; }
+        .nav-item a {
+            display: flex; align-items: center; gap: 6px; padding: 12px 14px; text-decoration: none; color: var(--m365-text); font-size: 13px; font-weight: 500; border-bottom: 3px solid transparent;
+        }
+        .nav-item.active a { color: var(--m365-blue); border-bottom-color: var(--m365-blue); font-weight: 600; }
+        .nav-item a:hover { background-color: #F3F2F1; }
+
+        /* --- MECHANISM BADGES --- */
+        .mech-tag {
+            font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 3px; display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; text-transform: none;
+        }
+        .mech-audience { background: var(--mech-tag-bg); color: var(--mech-tag-color); }
+        .mech-spfx { background: var(--mech-spfx-bg); color: var(--mech-spfx-color); }
+        .mech-list { background: var(--mech-list-bg); color: var(--mech-list-color); }
+        .mech-pbi { background: var(--mech-pbi-bg); color: var(--mech-pbi-color); }
+        .mech-teams { background: var(--mech-teams-bg); color: var(--mech-teams-color); }
+        .mech-purview { background: var(--mech-purview-bg); color: var(--mech-purview-color); }
+
+        /* --- HERO BANNER --- */
+        .hero-banner {
+            position: relative;
+            background: linear-gradient(135deg, #0F2537 0%, #1D4363 50%, #467197 100%);
+            color: #FFFFFF;
+            padding: 28px 32px;
+            margin: 16px 24px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+        /* Mountain / UAV background graphic via CSS SVG */
+        .hero-banner::before {
+            content: ""; position: absolute; right: 0; bottom: 0; top: 0; width: 60%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" preserveAspectRatio="none"><path d="M150 300 L350 120 L500 220 L650 80 L800 300 Z" fill="rgba(255,255,255,0.15)"/><path d="M0 300 L200 180 L400 260 L600 140 L800 300 Z" fill="rgba(255,255,255,0.08)"/><path d="M450 60 L480 65 L460 75 Z" fill="%23FFFFFF" opacity="0.8"/></svg>') no-repeat right bottom;
+            background-size: cover; opacity: 0.6; pointer-events: none;
+        }
+
+        .hero-banner.admin-hero {
+            background: linear-gradient(135deg, #091A2A 0%, #13324D 100%);
+        }
+
+        .hero-content { position: relative; z-index: 2; max-width: 600px; }
+        .hero-title { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+        .hero-subtitle { font-size: 13px; opacity: 0.9; margin-bottom: 16px; }
+
+        .hero-search {
+            background: #FFFFFF; border-radius: 4px; padding: 6px 12px; display: flex; align-items: center; gap: 8px; width: 100%; max-width: 440px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .hero-search input { border: none; outline: none; font-size: 13px; width: 100%; color: #323130; }
+
+        /* Security Note Floating Box */
+        .security-note-box {
+            position: relative; z-index: 2; background: rgba(255,255,255,0.95); color: #323130; padding: 12px 14px; border-radius: 6px; width: 280px; font-size: 11px; border: 1px solid #C8C6C4; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .security-note-header { font-weight: 700; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; color: #0F2537; }
+        .security-note-close { cursor: pointer; color: #605E5C; font-weight: bold; }
+
+        /* Terms / MFA Banner for External Party */
+        .alert-banner {
+            background: #FFF4CE; border: 1px solid #FCE100; border-left: 4px solid #D97706; padding: 10px 16px; margin: 0 24px 16px 24px; border-radius: 4px; font-size: 12px; display: flex; justify-content: space-between; align-items: center;
+        }
+
+        /* --- MAIN LAYOUT CONTAINER --- */
+        .container { padding: 0 24px; }
+        .grid-2col { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px; }
+        .grid-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+        .grid-4col { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px; }
+
+        /* --- CARDS & WEBPARTS --- */
+        .card {
+            background: var(--m365-card-bg); border-radius: 4px; border: 1px solid var(--m365-border); padding: 16px; box-shadow: 0 1.6px 3.6px 0 rgba(0,0,0,0.04);
+        }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .card-title { font-size: 14px; font-weight: 700; color: var(--m365-text); display: flex; align-items: center; }
+        .card-link { font-size: 11px; color: var(--m365-blue); text-decoration: none; font-weight: 600; }
+        .card-link:hover { text-decoration: underline; }
+
+        /* Featured News Cards */
+        .news-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .news-item { border: 1px solid var(--m365-border); border-radius: 4px; overflow: hidden; background: #FFF; }
+        .news-img { height: 90px; background-size: cover; background-position: center; }
+        .news-body { padding: 10px; }
+        .news-pill { font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 2px; text-transform: uppercase; width: fit-content; margin-bottom: 4px; }
+        .pill-company { background: #E1DFDD; color: #323130; }
+        .pill-ops { background: #C7E0F4; color: #005A9E; }
+        .pill-people { background: #E1D9F1; color: #5C2D91; }
+        .news-item-title { font-size: 11px; font-weight: 700; color: var(--m365-text); line-height: 1.3; margin-bottom: 6px; }
+        .news-date { font-size: 10px; color: var(--m365-text-secondary); }
+
+        /* Announcements List */
+        .announcement-list { display: flex; flex-direction: column; gap: 10px; }
+        .announcement-item { display: flex; align-items: flex-start; gap: 10px; border-bottom: 1px solid #F3F2F1; padding-bottom: 8px; }
+        .announcement-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .ann-pill { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px; color: #FFF; min-width: 65px; text-align: center; }
+        .ann-title { font-size: 12px; font-weight: 600; color: var(--m365-text); }
+        .ann-date { font-size: 10px; color: var(--m365-text-secondary); }
+
+        /* Quick Links Tiles */
+        .quick-links-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+        .ql-tile { background: #F8F9FA; border: 1px solid var(--m365-border); border-radius: 4px; padding: 12px 8px; text-align: center; text-decoration: none; color: var(--m365-text); font-size: 11px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .ql-tile:hover { background: #EFF6FC; border-color: var(--m365-blue); }
+        .ql-icon { width: 28px; height: 28px; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #FFF; font-weight: bold; }
+
+        /* Events List */
+        .event-item { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid #F3F2F1; }
+        .event-item:last-child { border-bottom: none; }
+        .event-date-box { background: #EFF6FC; color: #0078D4; padding: 4px 8px; border-radius: 4px; text-align: center; font-weight: 700; font-size: 11px; line-height: 1.1; min-width: 44px; }
+        .event-details { display: flex; flex-direction: column; }
+        .event-title { font-size: 11px; font-weight: 600; }
+        .event-time { font-size: 10px; color: var(--m365-text-secondary); }
+
+        /* Tasks / Projects Tabs */
+        .tab-header { display: flex; gap: 12px; border-bottom: 1px solid var(--m365-border); padding-bottom: 6px; margin-bottom: 10px; font-size: 12px; font-weight: 600; }
+        .tab-btn { cursor: pointer; color: var(--m365-text-secondary); }
+        .tab-btn.active { color: var(--m365-blue); border-bottom: 2px solid var(--m365-blue); padding-bottom: 4px; }
+        .task-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; font-size: 11px; border-bottom: 1px solid #F3F2F1; }
+        .task-item:last-child { border-bottom: none; }
+
+        /* Power BI Key KPIs */
+        .kpi-box { margin-bottom: 10px; }
+        .kpi-title-val { display: flex; justify-content: space-between; align-items: baseline; font-size: 11px; font-weight: 600; }
+        .kpi-val-big { font-size: 20px; font-weight: 700; color: #0078D4; }
+        .kpi-bar-bg { background: #EDEBE9; height: 8px; border-radius: 4px; overflow: hidden; margin: 4px 0; }
+        .kpi-bar-fill { background: #0078D4; height: 100%; }
+
+        /* Deal Team View Additions */
+        .stat-card-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .stat-box { background: #F8F9FA; border: 1px solid var(--m365-border); border-radius: 4px; padding: 10px; text-align: center; }
+        .stat-num { font-size: 18px; font-weight: 700; color: var(--m365-navy); }
+        .stat-desc { font-size: 10px; color: var(--m365-text-secondary); }
+
+        /* Action Badge List */
+        .action-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #F3F2F1; border-radius: 4px; margin-bottom: 6px; font-size: 11px; }
+        .count-badge { background: #D13438; color: #FFF; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px; }
+
+        /* External Investor View Layout */
+        .folder-grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .folder-card { background: #F8F9FA; border: 1px solid var(--m365-border); border-radius: 4px; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; font-size: 11px; }
+        .folder-card:hover { border-color: var(--m365-blue); background: #FFF; }
+        .folder-info { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+        .new-doc-badge { background: #107C41; color: #FFF; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 8px; }
+
+        /* Status Pills */
+        .status-pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; text-align: center; }
+        .status-open { background: #FEF3C7; color: #92400E; }
+        .status-progress { background: #E0F2FE; color: #0369A1; }
+        .status-answered { background: #D1FAE5; color: #065F46; }
+
+        /* Admin Donut Chart */
+        .donut-container { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
+        .donut-chart { width: 70px; height: 70px; border-radius: 50%; background: conic-gradient(#107C41 0% 92%, #EDEBE9 92% 100%); display: flex; align-items: center; justify-content: center; }
+        .donut-inner { width: 50px; height: 50px; background: #FFF; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+
+        /* --- FOOTER RIBBON --- */
+        .footer-ribbon {
+            position: fixed; bottom: 0; left: 0; right: 0; height: 32px; background: var(--m365-dark-navy); color: #C8C6C4; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; font-size: 11px; z-index: 1000; border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Hide / Show Role Views */
+        .role-view { display: none; }
+        .role-view.active { display: block; }
+    </style>
+</head>
+<body>
+
+    <!-- ========================================================================= -->
+    <!-- 1. SUITE BAR (SHARED HEADER)                                              -->
+    <!-- ========================================================================= -->
+    <header class="suite-bar">
+        <div class="suite-left">
+            <div class="waffle-icon" title="App Launcher">
+                <span></span><span></span><span></span>
+                <span></span><span></span><span></span>
+                <span></span><span></span><span></span>
+            </div>
+            <div class="brand-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                <span>Aerion Dynamics (Sample)</span>
+            </div>
+        </div>
+
+        <div class="suite-center">
+            <!-- DEMO ROLE SWITCHER -->
+            <div class="switcher-container">
+                <span class="switcher-label" data-en="View as:" data-vi="Giao diện:">View as:</span>
+                <select id="roleSelector" class="switcher-select" onchange="switchRole(this.value)">
+                    <option value="employee">Employee (Internal)</option>
+                    <option value="dealteam">Deal Team (Internal)</option>
+                    <option value="partya">External Investor (Party A)</option>
+                    <option value="admin">Administrator</option>
+                </select>
+                <span class="demo-tag">Demo only</span>
+            </div>
+
+            <!-- SEEN AS SEARCH BAR -->
+            <div class="suite-search">
+                <span style="font-size: 11px; color: #C8C6C4; font-weight: 600;" data-en="Seen as:" data-vi="Tìm kiếm:">Seen as:</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="suiteSearchInput" placeholder="Search this site">
+            </div>
+        </div>
+
+        <div class="suite-right">
+            <div class="lang-switch">
+                <span id="lang-en" class="active" onclick="setLanguage('en')">EN</span> | 
+                <span id="lang-vi" onclick="setLanguage('vi')">VI</span>
+            </div>
+            <div class="user-profile">
+                <div class="avatar" id="user-avatar">AC</div>
+                <div class="user-details">
+                    <span class="user-name" id="user-name">Alex Carter</span>
+                    <span class="user-role-badge badge-internal" id="user-badge">Internal</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========================================================================= -->
+    <!-- 2. PERMISSION-TRIMMED NAVIGATION BAR                                     -->
+    <!-- ========================================================================= -->
+    <nav class="nav-bar">
+        <ul class="nav-items" id="mainNav">
+            <!-- Rendered dynamically by JavaScript per Role Matrix -->
+        </ul>
+        <div style="font-size:16px; cursor:pointer; color:#605E5C;">•••</div>
+    </nav>
+
+    <!-- ========================================================================= -->
+    <!-- 3. VIEW 1: EMPLOYEE VIEW (INTERNAL)                                      -->
+    <!-- ========================================================================= -->
+    <div id="view-employee" class="role-view active">
+        
+        <!-- HERO BANNER -->
+        <div class="hero-banner">
+            <div class="hero-content">
+                <div class="hero-title" data-en="Good morning, Alex Carter" data-vi="Chào buổi sáng, Alex Carter">Good morning, Alex Carter</div>
+                <div class="hero-subtitle" data-en="Welcome to Aerion Dynamics ePortal" data-vi="Chào mừng đến với Cổng thông tin Aerion Dynamics">Welcome to Aerion Dynamics ePortal</div>
+                <div class="hero-search">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#605E5C" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" placeholder="Search or ask the Data Room...">
+                </div>
+            </div>
+            <div class="security-note-box">
+                <div class="security-note-header">
+                    <span data-en="Security note (Demo mode)" data-vi="Ghi chú an ninh (Demo)">Security note (Demo mode)</span>
+                    <span class="security-note-close">✕</span>
+                </div>
+                <p data-en="Audience targeting controls what is shown. Access is enforced by permissions, labels and party isolation." data-vi="Phân quyền đối tượng kiểm soát nội dung hiển thị. Truy cập được thực thi bởi quyền, nhãn bảo mật và cách ly bên ngoài.">Audience targeting controls what is shown. Access is enforced by permissions, labels and party isolation.</p>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- ROW 1: FEATURED NEWS & ANNOUNCEMENTS -->
+            <div class="grid-2col">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span data-en="Featured News" data-vi="Tin tức nổi bật">Featured News</span>
+                            <span class="mech-tag mech-audience">Audience targeted web part</span>
+                        </div>
+                        <a href="#" class="card-link" data-en="View all" data-vi="Xem tất cả">View all</a>
+                    </div>
+                    <div class="news-grid">
+                        <div class="news-item">
+                            <div class="news-img" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="150"><rect width="300" height="150" fill="%230F2537"/><circle cx="150" cy="75" r="40" fill="%230078D4" opacity="0.5"/></svg>');"></div>
+                            <div class="news-body">
+                                <span class="news-pill pill-company">Company</span>
+                                <div class="news-item-title">Aerion Dynamics achieves new export licence approval</div>
+                                <div class="news-date">Apr 28, 2025</div>
+                            </div>
+                        </div>
+                        <div class="news-item">
+                            <div class="news-img" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="150"><rect width="300" height="150" fill="%23107C41"/><path d="M0 150 L150 50 L300 150 Z" fill="%23FFF" opacity="0.2"/></svg>');"></div>
+                            <div class="news-body">
+                                <span class="news-pill pill-ops">Operations</span>
+                                <div class="news-item-title">Production line reaches new milestone</div>
+                                <div class="news-date">Apr 25, 2025</div>
+                            </div>
+                        </div>
+                        <div class="news-item">
+                            <div class="news-img" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="150"><rect width="300" height="150" fill="%235C2D91"/><circle cx="200" cy="50" r="60" fill="%23FFF" opacity="0.2"/></svg>');"></div>
+                            <div class="news-body">
+                                <span class="news-pill pill-people">People</span>
+                                <div class="news-item-title">Welcome to our new engineering director</div>
+                                <div class="news-date">Apr 22, 2025</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span data-en="Announcements" data-vi="Thông báo">Announcements</span>
+                            <span class="mech-tag mech-audience">Audience targeted web part</span>
+                        </div>
+                        <a href="#" class="card-link" data-en="View all" data-vi="Xem tất cả">View all</a>
+                    </div>
+                    <div class="announcement-list">
+                        <div class="announcement-item">
+                            <span class="ann-pill" style="background:var(--pill-important)">Important</span>
+                            <div>
+                                <div class="ann-title">Security reminder: update your MFA</div>
+                                <div class="ann-date">Apr 29, 2025</div>
+                            </div>
+                        </div>
+                        <div class="announcement-item">
+                            <span class="ann-pill" style="background:var(--pill-notice)">Notice</span>
+                            <div>
+                                <div class="ann-title">System maintenance (Sat 3 May)</div>
+                                <div class="ann-date">Apr 27, 2025</div>
+                            </div>
+                        </div>
+                        <div class="announcement-item">
+                            <span class="ann-pill" style="background:var(--pill-info)">Info</span>
+                            <div>
+                                <div class="ann-title">Town hall meeting (all staff)</div>
+                                <div class="ann-date">Apr 24, 2025</div>
+                            </div>
+                        </div>
+                        <div class="announcement-item">
+                            <span class="ann-pill" style="background:var(--pill-update)">Update</span>
+                            <div>
+                                <div class="ann-title">Travel policy updated</div>
+                                <div class="ann-date">Apr 20, 2025</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ROW 2: QUICK LINKS, EVENTS, TASKS, KPIS -->
+            <div class="grid-4col">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span data-en="Quick Links" data-vi="Liên kết nhanh">Quick Links</span>
+                            <span class="mech-tag mech-audience" style="background:#EDEBE9; color:#323130">SharePoint web part</span>
+                        </div>
+                    </div>
+                    <div class="quick-links-container">
+                        <a href="#" class="ql-tile"><div class="ql-icon" style="background:#0078D4">📄</div><span>Documents</span></a>
+                        <a href="#" class="ql-tile"><div class="ql-icon" style="background:#5C2D91">📚</div><span>Wiki</span></a>
+                        <a href="#" class="ql-tile"><div class="ql-icon" style="background:#008272">📊</div><span>Projects</span></a>
+                        <a href="#" class="ql-tile"><div class="ql-icon" style="background:#107C41">📈</div><span>Dashboards</span></a>
+                        <a href="#" class="ql-tile"><div class="ql-icon" style="background:#00B7C3">🎧</div><span>IT Support</span></a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span data-en="Upcoming Events" data-vi="Sự kiện sắp tới">Upcoming Events</span>
+                            <span class="mech-tag mech-teams">Outlook/Teams integration</span>
+                        </div>
+                        <a href="#" class="card-link">View all</a>
+                    </div>
+                    <div class="event-item">
+                        <div class="event-date-box">30<br>Apr</div>
+                        <div class="event-details">
+                            <span class="event-title">PMO Sync</span>
+                            <span class="event-time">10:00 - 11:00 | Teams</span>
+                        </div>
+                    </div>
+                    <div class="event-item">
+                        <div class="event-date-box">02<br>May</div>
+                        <div class="event-details">
+                            <span class="event-title">Project Kick-off</span>
+                            <span class="event-time">14:00 - 15:00 | Teams</span>
+                        </div>
+                    </div>
+                    <div class="event-item">
+                        <div class="event-date-box">07<br>May</div>
+                        <div class="event-details">
+                            <span class="event-title">Team Lunch</span>
+                            <span class="event-time">12:00 - 13:00 | Office</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span data-en="My tasks / My projects" data-vi="Nhiệm vụ / Dự án của tôi">My tasks / My projects</span>
+                            <span class="mech-tag mech-list">SharePoint lists</span>
+                        </div>
+                    </div>
+                    <div class="tab-header">
+                        <span class="tab-btn active">My tasks</span>
+                        <span class="tab-btn">My projects</span>
+                    </div>
+                    <div class="task-item">
+                        <span><input type="checkbox"> Review contract draft</span>
+                        <span style="color:#605E5C; font-size:10px;">Due 30 Apr</span>
+                    </div>
+                    <div class="task-item">
+                        <span><input type="checkbox"> Update project status</span>
+                        <span style="color:#605E5C; font-size:10px;">Due 3 May</span>
+                    </div>
+                    <div class="task-item">
+                        <span><input type="checkbox"> Prepare Q2 report</span>
+                        <span style="color:#605E5C; font-size:10px;">Due 7 May</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span data-en="Key KPIs" data-vi="Chỉ số KPI chính">Key KPIs</span>
+                            <span class="mech-tag mech-pbi">Power BI</span>
+                        </div>
+                    </div>
+                    <div class="kpi-box">
+                        <div class="kpi-title-val">
+                            <span>Production vs Target</span>
+                            <span class="kpi-val-big">82%</span>
+                        </div>
+                        <div class="kpi-bar-bg"><div class="kpi-bar-fill" style="width: 82%;"></div></div>
+                        <div style="display:flex; justify-size:space-between; font-size:9px; color:#605E5C;">
+                            <span>1,230 / 1,500 units</span>
+                            <span>270 Gap</span>
+                        </div>
+                    </div>
+                    <div class="kpi-box">
+                        <div class="kpi-title-val">
+                            <span>Sales vs Target</span>
+                            <span class="kpi-val-big">76%</span>
+                        </div>
+                        <div class="kpi-bar-bg"><div class="kpi-bar-fill" style="width: 76%; background:#008272;"></div></div>
+                        <div style="display:flex; justify-content:space-between; font-size:9px; color:#605E5C;">
+                            <span>$18.4M / $24.0M</span>
+                            <span>$5.6M Gap</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 4. VIEW 2: DEAL TEAM VIEW (INTERNAL)                                     -->
+    <!-- ========================================================================= -->
+    <div id="view-dealteam" class="role-view">
+        <div class="hero-banner">
+            <div class="hero-content">
+                <div class="hero-title">Good morning, Jamie Lee</div>
+                <div class="hero-subtitle">Deal Team Portal</div>
+                <div class="hero-search">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#605E5C" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" placeholder="Search or ask the Data Room...">
+                </div>
+            </div>
+            <div class="security-note-box">
+                <div class="security-note-header">
+                    <span>Security note (Demo mode)</span>
+                    <span class="security-note-close">✕</span>
+                </div>
+                <p>Audience targeting controls what is shown. Access is enforced by permissions, labels and party isolation.</p>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- DEAL TEAM TOP ROW -->
+            <div class="grid-3col">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Featured News <span class="mech-tag mech-audience">Audience targeted web part</span></div>
+                        <a href="#" class="card-link">View all</a>
+                    </div>
+                    <div class="news-grid">
+                        <div class="news-item">
+                            <div class="news-img" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="150"><rect width="300" height="150" fill="%230F2537"/></svg>');"></div>
+                            <div class="news-body">
+                                <span class="news-pill pill-company">Company</span>
+                                <div class="news-item-title">Aerion Dynamics achieves new export licence approval</div>
+                                <div class="news-date">Apr 28, 2025</div>
+                            </div>
+                        </div>
+                        <div class="news-item">
+                            <div class="news-img" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="150"><rect width="300" height="150" fill="%23107C41"/></svg>');"></div>
+                            <div class="news-body">
+                                <span class="news-pill pill-ops">Operations</span>
+                                <div class="news-item-title">Production line reaches new milestone</div>
+                                <div class="news-date">Apr 25, 2025</div>
+                            </div>
+                        </div>
+                        <div class="news-item">
+                            <div class="news-img" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="150"><rect width="300" height="150" fill="%235C2D91"/></svg>');"></div>
+                            <div class="news-body">
+                                <span class="news-pill pill-people">People</span>
+                                <div class="news-item-title">Welcome to our new engineering director</div>
+                                <div class="news-date">Apr 22, 2025</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DATA ROOM STATUS -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Data Room status <span class="mech-tag mech-spfx">Custom (SPFx)</span></div>
+                    </div>
+                    <div class="stat-card-grid">
+                        <div class="stat-box">
+                            <div class="stat-num" style="color:#107C41;">1,248</div>
+                            <div class="stat-desc">Items published</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-num" style="color:#D97706;">34</div>
+                            <div class="stat-desc">Pending approval</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-num" style="color:#0078D4;">12</div>
+                            <div class="stat-desc">Open Q&A</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-num" style="color:#5C2D91;">5</div>
+                            <div class="stat-desc">Guests expiring soon</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NEEDS MY ACTION -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Needs my action <span class="mech-tag mech-list">SharePoint lists</span></div>
+                    </div>
+                    <div class="action-item">
+                        <div>
+                            <strong>Approvals</strong>
+                            <div style="font-size:10px; color:#605E5C;">3 documents awaiting approval</div>
+                        </div>
+                        <span class="count-badge">3</span>
+                    </div>
+                    <div class="action-item">
+                        <div>
+                            <strong>Q&A to answer</strong>
+                            <div style="font-size:10px; color:#605E5C;">5 questions from investors</div>
+                        </div>
+                        <span class="count-badge">5</span>
+                    </div>
+                    <a href="#" class="card-link" style="margin-top:10px; display:inline-block;">Go to Control Centre →</a>
+                </div>
+            </div>
+
+            <!-- DEAL TEAM BOTTOM ROW (Identical to Employee) -->
+            <div class="grid-4col">
+                <div class="card">
+                    <div class="card-header"><div class="card-title">Quick Links <span class="mech-tag" style="background:#EDEBE9;">SharePoint web part</span></div></div>
+                    <div class="quick-links-container">
+                        <a href="#" class="ql-tile"><div class="ql-icon" style="background:#0078D4">📄</div><span>Documents</span></a>
+                        <a href="#" class="ql-tile"><div class="ql-icon" style="background:#5C2D91">📚</div><span>Wiki</span></a>
+                        <a href="#" class="ql-tile"><div class="ql-icon" style="background:#008272">📊</div><span>Projects</span></a>
+                        <a href="#" class="ql-tile"><div class="ql-icon" style="background:#107C41">📈</div><span>Dashboards</span></a>
+                        <a href="#" class="ql-tile"><div class="ql-icon" style="background:#00B7C3">🎧</div><span>IT Support</span></a>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><div class="card-title">Upcoming Events <span class="mech-tag mech-teams">Outlook/Teams integration</span></div></div>
+                    <div class="event-item"><div class="event-date-box">30<br>Apr</div><div class="event-details"><span class="event-title">PMO Sync</span><span class="event-time">10:00 - 11:00 | Teams</span></div></div>
+                    <div class="event-item"><div class="event-date-box">02<br>May</div><div class="event-details"><span class="event-title">Project Kick-off</span><span class="event-time">14:00 - 15:00 | Teams</span></div></div>
+                    <div class="event-item"><div class="event-date-box">07<br>May</div><div class="event-details"><span class="event-title">Team Lunch</span><span class="event-time">12:00 - 13:00 | Office</span></div></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><div class="card-title">My tasks / My projects <span class="mech-tag mech-list">SharePoint lists</span></div></div>
+                    <div class="tab-header"><span class="tab-btn active">My tasks</span><span class="tab-btn">My projects</span></div>
+                    <div class="task-item"><span><input type="checkbox"> Review contract draft</span><span style="color:#605E5C; font-size:10px;">Due 30 Apr</span></div>
+                    <div class="task-item"><span><input type="checkbox"> Update project status</span><span style="color:#605E5C; font-size:10px;">Due 3 May</span></div>
+                    <div class="task-item"><span><input type="checkbox"> Prepare Q2 report</span><span style="color:#605E5C; font-size:10px;">Due 7 May</span></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><div class="card-title">Key KPIs <span class="mech-tag mech-pbi">Power BI</span></div></div>
+                    <div class="kpi-box">
+                        <div class="kpi-title-val"><span>Production vs Target</span><span class="kpi-val-big">82%</span></div>
+                        <div class="kpi-bar-bg"><div class="kpi-bar-fill" style="width: 82%;"></div></div>
+                    </div>
+                    <div class="kpi-box">
+                        <div class="kpi-title-val"><span>Sales vs Target</span><span class="kpi-val-big">76%</span></div>
+                        <div class="kpi-bar-bg"><div class="kpi-bar-fill" style="width: 76%; background:#008272;"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 5. VIEW 3: EXTERNAL INVESTOR VIEW (PARTY A OR B)                         -->
+    <!-- ========================================================================= -->
+    <div id="view-partya" class="role-view">
+        <div class="hero-banner">
+            <div class="hero-content">
+                <div class="hero-title">Welcome, Taylor Morgan</div>
+                <div class="hero-subtitle">Data Room - Party A</div>
+            </div>
+            <div class="security-note-box" style="background:#FFF;">
+                <div class="security-note-header">
+                    <span style="color:#0078D4; display:flex; align-items:center; gap:4px;">🛡️ Your session</span>
+                    <span class="security-note-close">✕</span>
+                </div>
+                <div style="font-weight:600; font-size:11px;">MFA enabled</div>
+                <div style="font-size:10px; color:#605E5C;">Session expires in 59:32</div>
+            </div>
+        </div>
+
+        <div class="alert-banner">
+            <div>
+                <span>⚠️ By accessing this data room, you confirm that you have read and agree to the <a href="#" style="color:#0078D4; font-weight:600;">Terms of Use</a> and Confidentiality Agreement.</span>
+            </div>
+            <div>
+                <a href="#" class="card-link" style="margin-right:12px;">View terms</a>
+                <span style="cursor:pointer; font-weight:bold;">✕</span>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="grid-2col">
+                <!-- DATA ROOM PROGRESS (FOLDERS) -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Data Room progress <span class="mech-tag mech-spfx">Custom (SPFx)</span></div>
+                        <a href="#" class="card-link">View all</a>
+                    </div>
+                    <div class="folder-grid-2col">
+                        <div class="folder-card"><div class="folder-info">📁 00. Corporate Overview</div><div>12 docs <span class="new-doc-badge">+2</span></div></div>
+                        <div class="folder-card"><div class="folder-info">📁 06. IP & R&D</div><div>10 docs <span class="new-doc-badge">+1</span></div></div>
+                        <div class="folder-card"><div class="folder-info">📁 01. Financial Information</div><div>18 docs <span class="new-doc-badge">+1</span></div></div>
+                        <div class="folder-card"><div class="folder-info">📁 07. Contracts</div><div>28 docs <span class="new-doc-badge">+5</span></div></div>
+                        <div class="folder-card"><div class="folder-info">📁 02. Legal & Compliance</div><div>24 docs <span class="new-doc-badge">+3</span></div></div>
+                        <div class="folder-card"><div class="folder-info">📁 08. Tax</div><div>16 docs <span class="new-doc-badge">+2</span></div></div>
+                        <div class="folder-card"><div class="folder-info">📁 03. Products & Technology</div><div>36 docs <span class="new-doc-badge">+4</span></div></div>
+                        <div class="folder-card"><div class="folder-info">📁 09. ESG & Sustainability</div><div>9 docs <span class="new-doc-badge" style="background:#8A8886;">0</span></div></div>
+                        <div class="folder-card"><div class="folder-info">📁 04. Operations & Supply Chain</div><div>22 docs <span class="new-doc-badge">+1</span></div></div>
+                        <div class="folder-card"><div class="folder-info">📁 10. Regulatory & Export</div><div>12 docs <span class="new-doc-badge">+1</span></div></div>
+                        <div class="folder-card"><div class="folder-info">📁 05. HR & Key Personnel</div><div>14 docs <span class="new-doc-badge" style="background:#8A8886;">0</span></div></div>
+                    </div>
+                    <a href="#" class="card-link" style="margin-top:12px; display:inline-block;">View all folders →</a>
+                </div>
+
+                <!-- RIGHT SIDE STACK -->
+                <div style="display:flex; flex-direction:column; gap:16px;">
+                    <!-- CONTINUE WHERE YOU LEFT OFF -->
+                    <div class="card">
+                        <div class="card-header"><div class="card-title">Continue where you left off <span class="mech-tag mech-spfx">Custom (SPFx)</span></div></div>
+                        <div style="font-size:11px; margin-bottom:6px;">
+                            <strong>📁 07. Contracts</strong> <span style="color:#605E5C;">5 new docs • 12 min ago</span>
+                        </div>
+                        <div style="font-size:11px; margin-bottom:8px;">
+                            <strong>📁 02. Financial Information</strong> <span style="color:#605E5C;">3 new docs • 1 hour ago</span>
+                        </div>
+                        <a href="#" class="card-link">Open folder →</a>
+                    </div>
+
+                    <!-- TARGETED ANNOUNCEMENTS -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Targeted announcements <span class="mech-tag mech-audience">Audience targeted web part</span></div>
+                        </div>
+                        <div style="font-size:11px; font-weight:700;">New documents added to folder 07</div>
+                        <div style="font-size:10px; color:#605E5C; margin-bottom:6px;">3 new documents available for your review. Apr 29, 2025</div>
+                        <a href="#" class="card-link">View all</a>
+                    </div>
+
+                    <!-- MY OPEN QUESTIONS -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">My open questions <span class="mech-tag mech-list">SharePoint lists</span></div>
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:6px; font-size:11px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span>License validity period</span>
+                                <span class="status-pill status-open">Open</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span>Export control classification</span>
+                                <span class="status-pill status-progress">In progress</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span>Payment terms</span>
+                                <span class="status-pill status-answered">Answered</span>
+                            </div>
+                        </div>
+                        <a href="#" class="card-link" style="margin-top:8px; display:inline-block;">View all Q&A →</a>
+                    </div>
+
+                    <!-- HELP / CONTACT -->
+                    <div class="card">
+                        <div class="card-header"><div class="card-title">Help / Contact <span class="mech-tag" style="background:#EDEBE9;">SharePoint web part</span></div></div>
+                        <div style="font-size:11px;">
+                            <div><strong>Contact the deal team</strong></div>
+                            <a href="mailto:dedicated@aerion-dynamics.com" style="color:#0078D4;">dedicated@aerion-dynamics.com</a>
+                        </div>
+                        <div style="font-size:11px; margin-top:8px;">
+                            <div><strong>FAQ</strong></div>
+                            <a href="#" style="color:#0078D4;">View common questions</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="font-size:11px; color:#605E5C; margin-top:12px; display:flex; align-items:center; gap:4px;">
+                🛡️ Activity on this site is logged.
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 6. VIEW 4: ADMINISTRATOR VIEW                                            -->
+    <!-- ========================================================================= -->
+    <div id="view-admin" class="role-view">
+        <div class="hero-banner admin-hero">
+            <div class="hero-content">
+                <div class="hero-title">Good morning, Morgan Davis</div>
+                <div class="hero-subtitle">Administrator Console</div>
+            </div>
+            <div class="security-note-box">
+                <div class="security-note-header">
+                    <span>Security note (Demo mode)</span>
+                    <span class="security-note-close">✕</span>
+                </div>
+                <p>Audience targeting controls what is shown. Access is enforced by permissions, labels and party isolation.</p>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="grid-4col">
+                <!-- GOVERNANCE HEALTH -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Governance Health <span class="mech-tag mech-spfx">Custom (SPFx)</span></div>
+                    </div>
+                    <div class="donut-container">
+                        <div class="donut-chart"><div class="donut-inner">92%</div></div>
+                        <div>
+                            <div style="font-weight:700; font-size:12px;">Overall health</div>
+                            <div style="color:#107C41; font-weight:600; font-size:11px;">Good</div>
+                        </div>
+                    </div>
+                    <div style="font-size:11px; display:flex; flex-direction:column; gap:4px;">
+                        <div><span style="color:#107C41;">✓</span> Permissions: <strong>Good</strong></div>
+                        <div><span style="color:#107C41;">✓</span> Labels & sensitivity: <strong>Good</strong></div>
+                        <div><span style="color:#107C41;">✓</span> External sharing: <strong>Good</strong></div>
+                        <div><span style="color:#D97706;">✦</span> Retention: <strong style="color:#D97706;">Needs attention</strong></div>
+                    </div>
+                </div>
+
+                <!-- EXPIRING GUESTS -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Expiring Guests <span class="mech-tag mech-list">SharePoint lists</span></div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+                        <span style="background:#D13438; color:#FFF; font-weight:bold; padding:2px 8px; border-radius:10px;">5</span>
+                        <span style="font-size:11px; font-weight:600;">Guests expiring in 7 days</span>
+                    </div>
+                    <div style="font-size:11px; display:flex; flex-direction:column; gap:6px;">
+                        <div style="display:flex; justify-content:space-between;"><span>Investor A</span><span style="color:#605E5C;">7 May 2025</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Legal Advisor</span><span style="color:#605E5C;">8 May 2025</span></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Auditor</span><span style="color:#605E5C;">9 May 2025</span></div>
+                    </div>
+                    <a href="#" class="card-link" style="margin-top:12px; display:inline-block;">View all guests →</a>
+                </div>
+
+                <!-- UNLABELLED FILES -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Unlabelled Files <span class="mech-tag" style="background:#E0F2FE; color:#0369A1;">Content search</span></div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+                        <span style="background:#D97706; color:#FFF; font-weight:bold; padding:2px 8px; border-radius:10px;">23</span>
+                        <span style="font-size:11px; font-weight:600;">Files without sensitivity labels</span>
+                    </div>
+                    <div style="font-size:11px; display:flex; flex-direction:column; gap:4px;">
+                        <div style="display:flex; justify-content:space-between;"><span>Contracts</span><strong>8</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Finance</span><strong>6</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>HR</span><strong>4</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Others</span><strong>5</strong></div>
+                    </div>
+                    <a href="#" class="card-link" style="margin-top:12px; display:inline-block;">View files →</a>
+                </div>
+
+                <!-- POLICY ALERTS -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Policy Alerts <span class="mech-tag mech-purview">Microsoft Purview</span></div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+                        <span style="background:#D13438; color:#FFF; font-weight:bold; padding:2px 8px; border-radius:10px;">2</span>
+                        <span style="font-size:11px; font-weight:600;">Policy violations / alerts</span>
+                    </div>
+                    <div style="font-size:11px; display:flex; flex-direction:column; gap:8px;">
+                        <div>
+                            <div><strong>Unusual external sharing</strong></div>
+                            <div style="color:#605E5C; font-size:10px;">1 file</div>
+                        </div>
+                        <div>
+                            <div><strong>Blocked upload (DLP)</strong></div>
+                            <div style="color:#605E5C; font-size:10px;">1 file</div>
+                        </div>
+                    </div>
+                    <a href="#" class="card-link" style="margin-top:12px; display:inline-block;">View details →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 7. FOOTER RIBBON                                                          -->
+    <!-- ========================================================================= -->
+    <footer class="footer-ribbon">
+        <div>Sample / reference design, not final scope</div>
+        <div>EN | VI</div>
+    </footer>
+
+    <!-- ========================================================================= -->
+    <!-- INTERACTIVE JAVASCRIPT LOGIC                                             -->
+    <!-- ========================================================================= -->
+    <script>
+        const roleConfig = {
+            employee: {
+                name: "Alex Carter",
+                avatar: "AC",
+                badgeText: "Internal",
+                badgeClass: "badge-internal",
+                nav: ["Home", "News & Announcements", "Documents", "Knowledge / Wiki", "Calendar", "Projects", "Reports & Dashboards"]
+            },
+            dealteam: {
+                name: "Jamie Lee",
+                avatar: "JL",
+                badgeText: "Deal Team",
+                badgeClass: "badge-dealteam",
+                nav: ["Home", "News & Announcements", "Documents", "Knowledge / Wiki", "Calendar", "Projects", "Reports & Dashboards", "Data Room", "Control Centre"]
+            },
+            partya: {
+                name: "Taylor Morgan",
+                avatar: "TM",
+                badgeText: "Guest",
+                badgeClass: "badge-guest",
+                nav: ["Home"]
+            },
+            admin: {
+                name: "Morgan Davis",
+                avatar: "MD",
+                badgeText: "Administrator",
+                badgeClass: "badge-admin",
+                nav: ["Home", "Administration", "Audit"]
+            }
+        };
+
+        function switchRole(roleKey) {
+            const config = roleConfig[roleKey];
+            if (!config) return;
+
+            // 1. Update Suite Bar Info
+            document.getElementById('user-name').innerText = config.name;
+            document.getElementById('user-avatar').innerText = config.avatar;
+            const badge = document.getElementById('user-badge');
+            badge.innerText = config.badgeText;
+            badge.className = 'user-role-badge ' + config.badgeClass;
+
+            // 2. Trim Navigation Items
+            const navContainer = document.getElementById('mainNav');
+            navContainer.innerHTML = '';
+            config.nav.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.className = 'nav-item' + (index === 0 ? ' active' : '');
+                li.innerHTML = `<a href="#">${item}</a>`;
+                navContainer.appendChild(li);
+            });
+
+            // 3. Switch Visible View
+            document.querySelectorAll('.role-view').forEach(view => view.classList.remove('active'));
+            const targetView = document.getElementById('view-' + roleKey);
+            if (targetView) targetView.classList.add('active');
+        }
+
+        function setLanguage(lang) {
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+            document.getElementById('lang-vi').classList.toggle('active', lang === 'vi');
+            document.querySelectorAll('[data-en]').forEach(el => {
+                el.innerText = el.getAttribute('data-' + lang);
+            });
+        }
+
+        // Initialize Employee View
+        window.addEventListener('DOMContentLoaded', () => {
+            switchRole('employee');
+        });
+    </script>
+</body>
+</html>
